@@ -1,0 +1,15 @@
+{
+  "name": "payment-protocol-terminal",
+  "description": " Payment Protocol Implementation by expample",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bitcore-lib": "^0.14.0",
+    "bitcore-payment-protocol": "^1.2.2",
+    "body-parser": "^1.17.2",
+    "express": "^4.15.4",
+    "request": "^2.81.0",
+    "underscore": "^1.8.3"
+  }
+}
