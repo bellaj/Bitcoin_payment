@@ -11,6 +11,8 @@ in view directory:
 
 then in root folder : ``npm start``
 
+-http and https ports and IP will be displayed in your terminal
+
 ## Potential issues: 
 
 **issue 1**: More than one instance of bitcore-lib found. Please make sure to require bitcore-lib and check that submodules do not also include their own bitcore-lib dependency.
