@@ -31,7 +31,7 @@ then in root folder : ``npm start``
 **issue 2**: Cannot find module '../..' from '/home/user/deletme/Bitcoin_payment/node_modules/asn1.js-rfc5280'
 
 **solution** : edit node_modules/asn1.js-rfc5280/index.js
-Change: var asn1 = require('../..'); to  var asn1 = require('../' + '..');
+Change: ``var asn1 = require('../..');`` to  ``var asn1 = require('../' + '..');``
 
 **issue3** There is an issue with Firefox 
 Error for ReferenceError: $ is not defined[Learn More]
