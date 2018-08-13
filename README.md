@@ -11,7 +11,7 @@ in view directory:
 
 then in root folder : ``npm start``
 
-## Potential issue: 
+## Potential issues: 
 
 **issue 1**: More than one instance of bitcore-lib found. Please make sure to require bitcore-lib and check that submodules do not also include their own bitcore-lib dependency.
 
@@ -38,4 +38,5 @@ Error for ReferenceError: $ is not defined[Learn More]
 
 Cause : Firefox doesn't trust the link provided for Jquery!!
 
+if you have any additional problem, please consider to open an issue in this respository.
 
