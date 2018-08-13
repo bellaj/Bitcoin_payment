@@ -1,7 +1,17 @@
 # Bitcoin_payment
 
+## Instructions 
 
-##Potential issue: 
+
+in root folder :
+``npm install``
+
+in view directory:
+``bower install``
+
+then in root folder : ``npm start``
+
+## Potential issue: 
 
 **issue 1**: More than one instance of bitcore-lib found. Please make sure to require bitcore-lib and check that submodules do not also include their own bitcore-lib dependency.
 
