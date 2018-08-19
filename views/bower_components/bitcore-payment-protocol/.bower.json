@@ -1,0 +1,39 @@
+{
+  "name": "bitcore-payment-protocol",
+  "main": "./bitcore-payment-protocol.min.js",
+  "version": "1.2.2",
+  "homepage": "https://github.com/bitpay/bitcore-payment-protocol",
+  "authors": [
+    "BitPay, Inc."
+  ],
+  "description": "BIP70 Payment Protocol support for bitcore",
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "bitcoin",
+    "bitcore",
+    "btc",
+    "satoshi"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "CONTRIBUTING.md",
+    "gulpfile.js",
+    "lib",
+    "index.js",
+    "karma.conf.js",
+    "npm-shrinkwrap.json",
+    "test"
+  ],
+  "_release": "1.2.2",
+  "_resolution": {
+    "type": "version",
+    "tag": "v1.2.2",
+    "commit": "6e438c3f5ec7d8d61580ca756365dd10e341d804"
+  },
+  "_source": "https://github.com/bitpay/bitcore-payment-protocol.git",
+  "_target": "1.2.2",
+  "_originalSource": "bitcore-payment-protocol"
+}

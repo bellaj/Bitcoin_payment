@@ -12,20 +12,23 @@ var fs=require("fs");
 
 /*********************General settings***************************/
 
-var dcert= fs.readFileSync('./key_final/cert.der');
-var mcert= fs.readFileSync('./key_final/cert.pem');
-var mkey= fs.readFileSync('./key_final/key.pem');
+var dcert= fs.readFileSync('./keys/cert.der');
+var mcert= fs.readFileSync('./keys/cert.pem'); // for Https server
+var mkey= fs.readFileSync('./keys/key.pem');
 
 
 var credentials = {key: mkey, cert: mcert};
 var app = express();
-bitcore_lib.Networks.defaultNetwork = bitcore_lib.Networks.testnet;
 
-var privateKey =bitcore_lib.PrivateKey();
-var publicKey = bitcore_lib.PublicKey(privateKey);
+bitcore_lib.Networks.defaultNetwork = bitcore_lib.Networks.testnet;// the project run only on testnet
 var Merchant_address ="mhc5YipxN6GhRRXtgakRBjrNUCbz6ypg66";
-// You can generate random address using bitcore_lib.Address(publicKey, bitcore_lib.Networks.defaultNetwork ));
 
+/* Alternatively you can generate random address using 
+
+var privateKey =bitcore_lib.PrivateKey();//you can use a specific private key as argument
+var publicKey = bitcore_lib.PublicKey(privateKey);
+bitcore_lib.Address(publicKey, bitcore_lib.Networks.defaultNetwork ));
+*/
 /*********************Server's IP********************************/ 
 var os = require('os');
 
@@ -44,13 +47,13 @@ var IP=addresses[0];
 var port=8883;
 var http_port=3000;
 
-/*****************URI composition*********************************/
+/*****************Payment URI composition*********************************/
 
-function compose_uri(amount){
+function compose_uri(amount_to_pay){
 var pay_url = "http://"+IP+":"+http_port+"/request";
 var uriString = new URI({
   address: Merchant_address,
-  amount : amount, // in satoshis
+  amount : amount_to_pay, // in satoshis
   message: 'payment request'
 });
 
@@ -85,24 +88,20 @@ res.send(resp);
 });
 
 
- app.use(bodyParser.json());   
+// app.use(bodyParser.json());   
  var urlencodedParser = bodyParser.urlencoded({ extended: false });
 
  app.get("/request", urlencodedParser, function(req, res){
- var isbrowser=0;
-
- var Script = bitcore_lib.Script;
+  
  var amount = req.query.amount;
-if(req.query.browser)
- isbrowser=1;  
- if(amount==undefined) amount=0;
- var script = Script.buildPublicKeyHashOut(Merchant_address.toString());
+ amount = (amount === undefined) ? 0 : amount; // set amount to 0 if undefined
  
 /**************prepare output to request payment *************************************/
 // define the refund outputs
   var merchant_outputs = []; // Where payment should be sent
   var outputs = new PaymentProtocol().makeOutput();
   outputs.set('amount', amount);
+  var script = bitcore_lib.Script.buildPublicKeyHashOut(Merchant_address.toString());
   outputs.set('script', script.toBuffer());
   merchant_outputs.push(outputs.message);
 
@@ -128,21 +127,21 @@ if(req.query.browser)
   request.sign(mkey);
   var rawbody = request.serialize();
 
-/*****************ADDED*************************************************************************/
   res.set({
     'Content-Type': PaymentProtocol.PAYMENT_REQUEST_CONTENT_TYPE,
     'Content-Length': request.length,
     'Content-Transfer-Encoding': 'binary'
   });
-/******************For Browser******************************************************************/
- if(isbrowser==1){
+/******************response For Browser******************************************************************/
+ if(req.query.browser==1){
  var buf = new Buffer(rawbody, 'binary').toString('base64');
  res.contentType(PaymentProtocol.PAYMENT_REQUEST_CONTENT_TYPE);
  res.send(buf);
+
 }
-/********************for bitcoin client**********************************************************/
+/********************response for bitcoin client**********************************************************/
 else 
-res.status(200).send(rawbody); 
+{res.status(200).send(rawbody); }
  
 });
 
@@ -186,4 +185,4 @@ app.listen(http_port, function(){
 
 https.createServer(credentials, app).listen(port, function(){
   console.log("-https Server listening on :"+IP+":"+ port);
-});
+});/**/

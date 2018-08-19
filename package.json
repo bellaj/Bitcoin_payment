@@ -1,6 +1,6 @@
 {
   "name": "payment-protocol-terminal",
-  "description": "Bitcoin Example presented in the Second Chapter of 'Blockchain By Example'",
+  "description": " Payment Protocol Implementation by expample",
   "scripts": {
     "start": "node server.js"
   },

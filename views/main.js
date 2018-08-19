@@ -7,16 +7,17 @@ function get_payment_details(rawbody ){
 try {
 var body = PaymentProtocol.PaymentRequest.decode(rawbody);
 var request = (new PaymentProtocol()).makePaymentRequest(body);
+
 var version = request.get('payment_details_version');
 var pki_type = request.get('pki_type');
 var pki_data = request.get('pki_data');
 var serializedDetails = request.get('serialized_payment_details');
 var signature = request.get('signature');
 var verified = request.verify();
+verified=(verified) ? "Valid" : verified;
 var decodedDetails = PaymentProtocol.PaymentDetails.decode(serializedDetails);
 var details = new PaymentProtocol().makePaymentDetails(decodedDetails);
 var network = details.get('network');
-console.log(network);
 var outputs = details.get('outputs');
 var time = details.get('time');
 var expires = details.get('expires');
