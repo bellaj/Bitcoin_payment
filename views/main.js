@@ -66,6 +66,7 @@ function check_details() {
  
 function pay(pay_url){
 document.write("<body><div class='pay_div'><h1>Quick Checkout</h1><div class='result' id='result' name='result'> <div class='overview'> Payment URL : <a href=" +pay_url+ ">"+ pay_url +"</a> </div><br> <div id='qrcode'></div>  <input type='hidden' id='amount' value='888888'> <br> <input type='button' value='Transaction Details' onclick='check_details()'  id='check' class='check'><div class='details'></div></div><script src='./main.js'></script> <link rel='stylesheet' type='text/css' href='style.css' /></body>");
+
 var qrcode = new QRCode(document.getElementById("qrcode"), {
 	text: pay_url.toString(),
 	width: 128,
@@ -74,5 +75,6 @@ var qrcode = new QRCode(document.getElementById("qrcode"), {
 	colorLight : "#ffffff",
 	correctLevel : QRCode.CorrectLevel.H
 });
+console.log("url\n"+pay_url.toString());
 }
  

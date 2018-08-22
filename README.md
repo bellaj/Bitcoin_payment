@@ -1,7 +1,22 @@
 # Bitcoin_payment
 
 
+<<<<<<< HEAD
 ##Potential issue: 
+=======
+
+in root folder :
+``npm install``
+
+in view directory:
+``bower install``
+
+then in root folder : ``npm start``
+
+-http and https ports and IP will be displayed in your terminal
+
+## Potential issues: 
+>>>>>>> 780469a147cf6f668806620192046e7c6c2af947
 
 **issue 1**: More than one instance of bitcore-lib found. Please make sure to require bitcore-lib and check that submodules do not also include their own bitcore-lib dependency.
 

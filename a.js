@@ -8,8 +8,6 @@ var URI = require('bitcore-lib/lib/uri');
 var request=require("request");
 const https = require('https');
 var fs=require("fs");
-var rp = require('request-promise');
-
 
 
 /*********************General settings***************************/
@@ -23,10 +21,9 @@ var credentials = {key: mkey, cert: mcert};
 var app = express();
 
 bitcore_lib.Networks.defaultNetwork = bitcore_lib.Networks.testnet;// the project run only on testnet
-var Merchant_address ="myfpyoUdsz9h9CmEsFZFSWiZ6YX7fCxjuw"//"mhc5YipxN6GhRRXtgakRBjrNUCbz6ypg66";
+var Merchant_address ="mhc5YipxN6GhRRXtgakRBjrNUCbz6ypg66";
 
 /* Alternatively you can generate random address using 
-
 var privateKey =bitcore_lib.PrivateKey();//you can use a specific private key as argument
 var publicKey = bitcore_lib.PublicKey(privateKey);
 bitcore_lib.Address(publicKey, bitcore_lib.Networks.defaultNetwork ));
@@ -92,14 +89,16 @@ res.send(resp);
 
 // app.use(bodyParser.json());   
  var urlencodedParser = bodyParser.urlencoded({ extended: false });
+
  app.get("/request", urlencodedParser, function(req, res){
+  
  var amount = req.query.amount;
  amount = (amount === undefined) ? 0 : amount; // set amount to 0 if undefined
-
+ 
 /**************prepare output to request payment *************************************/
 // define the refund outputs
   var merchant_outputs = []; // Where payment should be sent
-  var outputs = new PaymentProtocol().makeOutput(); // check https://github.com/bitcoin/bips/blob/master/bip-0070.mediawiki#output
+  var outputs = new PaymentProtocol().makeOutput();
   outputs.set('amount', amount);
   var script = bitcore_lib.Script.buildPublicKeyHashOut(Merchant_address.toString());
   outputs.set('script', script.toBuffer());
@@ -110,10 +109,10 @@ res.send(resp);
   var now = Date.now() / 1000 | 0;
   details.set('network', 'test');
   details.set('outputs', merchant_outputs);
-  details.set('time', now); //required
+  details.set('time', now);
   details.set('expires', now + 60 * 60 * 24);
-  details.set('memo', 'Would you please proceed with the payment'); // !!!!!the msg will not be saved in the blockchain
-  details.set('payment_url', "http://"+IP+":"+http_port+"/payment?id=12345");// you can use instead https://...:8883
+  details.set('memo', 'A payment request from the merchant.');
+  details.set('payment_url', "http://"+IP+":"+http_port+"/payment?id=12345");
   details.set('merchant_data', new Buffer("Transaction N 12345")); // identify the request
 
 /************** form the request + sign it ****************************************************/
@@ -146,47 +145,27 @@ else
 });
 
 /*****************Receive a payment  ************************************************************/
-  var rawBodyParser = bodyParser.raw({type: PaymentProtocol.PAYMENT_CONTENT_TYPE});////support parsing of PaymentProtocol.PAYMENT_CONTENT_TYPE-urlencoded post data
-
-app.post("/payment", rawBodyParser, function(req, res){
+  var rawBodyParser = bodyParser.raw({type: PaymentProtocol.PAYMENT_CONTENT_TYPE});
+  app.post("/payment", rawBodyParser, function(req, res){
  
-
-var body = PaymentProtocol.Payment.decode(req.body); 
-var p = new PaymentProtocol();
-var payment= p.makePayment(body);
- 
-var merchant_data = payment.get('merchant_data');/*Arbitrary data that may be used by the merchant to identify the PaymentRequest. May be omitted if the merchant does not need to associate Payments with PaymentRequest or if they associate each PaymentRequest with a separate payment address.*/
-var refund_to = payment.get('refund_to');/*One or more outputs where the merchant may return funds, if necessary. The merchant may return funds using these outputs for up to 2 months after the time of the payment request.*/
-var memo = payment.get('memo');
- 
-var Rawtransaction = payment.get('transactions')[0].toBuffer();/*One or more valid, signed Bitcoin transactions that fully pay the PaymentRequest*/
-var TransactionToBrodcast = new bitcore_lib.Transaction(Rawtransaction).toString('hex');
-console.log("Raw Transaction\n"+TransactionToBrodcast)
-
-/*******************Broadcasting the transaction ***************************************/
-
-var ack = new PaymentProtocol().makePaymentACK();
-ack.set('payment', payment.message);
-var Sendingoptions = {
-	method: 'POST',
-	url: 'https://chain.so/api/v2/send_tx/BTCTEST',
-	//url:'https://api.blockcypher.com/v1/bcy/test/txs/push',
-	//body: {tx: TransactionToBrodcast},
-	body: {tx_hex: TransactionToBrodcast},
-	json: true
-};
-   
-rp(Sendingoptions).then(function (response) {
-var Jresponse= JSON.stringify(response);
-console.log("Transaction Jresponse:\n"+Jresponse);
-
-// After brodcasting the received transactions we return an ACK message and brodcast tx to network
-  ack.set('memo', 'Payment processed,Thank you ;) \ninvoice ID :'+req.query.id+"\nTransaction Details : "+Jresponse );//invoice is is staticaly defined in payment_url
-//Here you can add code to store invoice details in a database 
+/************in case sender create payment using bitcore*****************************************/
+  var body = PaymentProtocol.Payment.decode(req.body);
+  var payment = new PaymentProtocol().makePayment(body);
+  var transaction = payment.get('transactions');
+  var refund_to = payment.get('refund_to'); //output where a refund should be sent. 
+  var memo = payment.get('memo');
+//extract and brodcast tx to network
+/***********************send back ACK********************************************************/
+  var ack = new PaymentProtocol().makePaymentACK();
+  ack.set('payment', payment.message);
+  ack.set('memo', 'Payment processed,Thank you ;) \n invoice ID :'+req.query.id);
+//store invoice details in database  
   var rawack = ack.serialize();
-  res.set({  'Content-Type': PaymentProtocol.PAYMENT_ACK_CONTENT_TYPE,  'Content-Length': rawack.length  });
-  res.send(rawack);
+  res.set({
+  'Content-Type': PaymentProtocol.PAYMENT_ACK_CONTENT_TYPE,
+  'Content-Length': rawack.length,
   });
+  res.send(rawack);
 
 });
 
@@ -194,8 +173,7 @@ console.log("Transaction Jresponse:\n"+Jresponse);
 app.get("/invoice", urlencodedParser, function(req, res){
  
  var invoice_id = req.query.id;
- var detail="details about the invoice N:"+invoice_id; 
-//here you can add code to Request details from database  
+ var detail="details about the invoice N:"+invoice_id; //Request details from database  
  res.send(detail);
 });
 
